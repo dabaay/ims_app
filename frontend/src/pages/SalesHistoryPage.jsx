@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
+import config from '../config';
 import { Search, Printer, Receipt, Calendar, FileText, ChevronRight, User, Package } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
@@ -78,7 +79,7 @@ const SalesHistoryPage = () => {
                 </head>
                 <body>
                     <div class="header">
-                        ${settings.store_logo ? `<img class="logo" src="http://localhost:8000/storage/${settings.store_logo}" onerror="this.style.display='none'" />` : ''}
+                        ${settings.store_logo ? `<img class="logo" src="${config.storageUrl}/${settings.store_logo}" onerror="this.style.display='none'" />` : ''}
                         <h1 class="store-name">${settings.store_name}</h1>
                         <p style="margin: 5px 0;">${settings.store_address || 'Mogadishu, Somalia'}</p>
                         <p style="margin: 0; font-weight: bold;">TEL: ${settings.store_number || '+252 xxx xxx xxx'}</p>
@@ -181,7 +182,7 @@ const SalesHistoryPage = () => {
                 </head>
                 <body>
                     <div class="header">
-                        ${settings.store_logo ? `<img class="logo" src="http://localhost:8000/storage/${settings.store_logo}" onerror="this.style.display='none'" />` : ''}
+                        ${settings.store_logo ? `<img class="logo" src="${config.storageUrl}/${settings.store_logo}" onerror="this.style.display='none'" />` : ''}
                         <h2 class="store-name">${settings.store_name}</h2>
                         <p class="store-info">${settings.store_address || 'Mogadishu, Somalia'}</p>
                         <p class="store-info">TEL: ${settings.store_number || '+252 xxx xxx xxx'}</p>
@@ -307,7 +308,7 @@ const SalesHistoryPage = () => {
                 <body>
                     <div class="header">
                         <div class="company-info">
-                            ${settings.store_logo ? `<img class="logo" src="http://localhost:8000/storage/${settings.store_logo}" onerror="this.style.display='none'" />` : ''}
+                            ${settings.store_logo ? `<img class="logo" src="${config.storageUrl}/${settings.store_logo}" onerror="this.style.display='none'" />` : ''}
                             <div>
                                 <h1>${settings.store_name}</h1>
                                 <p>${settings.store_address || 'Mogadishu, Somalia'}</p>

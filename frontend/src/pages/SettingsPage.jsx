@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import config from '../config';
 import { useTheme } from '../context/useTheme';
 import { useSettings } from '../context/SettingsContextDef';
 import Modal from '../components/Modal';
@@ -107,7 +108,7 @@ const SettingsPage = () => {
             setStoreSettings(prev => ({ ...prev, ...settings }));
             
             if (settings.store_logo) {
-                setLogoPreview(`http://localhost:8000/storage/${settings.store_logo}`);
+                setLogoPreview(`${config.storageUrl}/${settings.store_logo}`);
             }
         } catch (error) {
             console.error("Failed to fetch settings:", error);

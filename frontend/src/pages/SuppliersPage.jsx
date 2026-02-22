@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from '../api/axios';
+import config from '../config';
 import { Plus, Search, Truck, Edit2, Trash2, Mail, Phone, MapPin, Save, X, Download, FileText, Upload, Link as LinkIcon } from 'lucide-react';
 import Modal from '../components/Modal';
 import { AuthContext } from '../context/AuthContext';
@@ -229,7 +230,7 @@ const SuppliersPage = () => {
                                     <td className="px-6 py-4">
                                         {s.document_path ? (
                                             <a 
-                                                href={`${(import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '')}/storage/${s.document_path}`} 
+                                                href={`${config.storageUrl}/${s.document_path}`} 
                                                 target="_blank" 
                                                 rel="noopener noreferrer"
                                                 className="inline-flex items-center space-x-1 px-2 py-1 bg-blue-500/10 text-blue-400 rounded text-[10px] font-bold"

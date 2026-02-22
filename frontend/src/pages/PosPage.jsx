@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from '../api/axios';
+import config from '../config';
 import { AuthContext } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContextDef';
 import { 
@@ -343,7 +344,7 @@ const PosPage = () => {
                                     <div className="h-32 w-full bg-slate-800 border-b border-slate-700 overflow-hidden relative">
                                         {product.image_path ? (
                                             <img 
-                                                src={`http://localhost:8000/storage/${product.image_path}`} 
+                                                src={`${config.storageUrl}/${product.image_path}`} 
                                                 alt={product.name}
                                                 className="w-full h-full object-cover transition-transform group-hover:scale-110"
                                             />
