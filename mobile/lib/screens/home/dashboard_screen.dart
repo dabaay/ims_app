@@ -1,12 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../services/api_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/product.dart';
 import '../../models/promotion.dart';
-import 'product_detail_screen.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'dart:async';
+import '../../providers/auth_provider.dart';
+import '../../services/api_service.dart';
+import '../product/product_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -22,10 +22,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _dashFuture = ApiService.getDashboard();
+    _dashFuture = ApiService.getDashboardData();
   }
 
-  void _refresh() => setState(() => _dashFuture = ApiService.getDashboard());
+  void _refresh() {
+    setState(() {
+      _dashFuture = ApiService.getDashboardData();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +167,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           .toList() ??
                       [];
 
+                  // --- Unified Promotion Logic ---
+                  // Also include products that are marked as promotions
+                  final productPromos = trending
+                      .where((p) => p.isPromotion)
+                      .map((p) => Promotion(
+                            promotionId: p.productId,
+                            title: p.name,
+                            description: p.description ?? '',
+                            imageUrl: p.imageUrl,
+                            isActive: true,
+                            productId: p.productId,
+                            product: p,
+                          ))
+                      .toList();
+
+                  // Combine them
+                  final allPromos = [...promotions, ...productPromos];
+
                   // Active discounts filter
                   final activeDiscounts =
                       discountedProds.where((p) => p.isOnDiscount).toList();
@@ -188,8 +210,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // ── Promotions Carousel ────────────────────────────
-                      if (promotions.isNotEmpty)
-                        _PromoCarousel(promotions: promotions),
+                      if (allPromos.isNotEmpty)
+                        _PromoCarousel(promotions: allPromos),
 
                       // ── Categories ────────────────────────────────────
                       _sectionTitle('Categories'),
@@ -428,7 +450,7 @@ class _PromoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (promo.productId != null && promo.product != null) {
+        if (promo.productId != null && (promo.product != null)) {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) => ProductDetailScreen(product: promo.product!),
@@ -457,7 +479,7 @@ class _PromoCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           child: Stack(
             children: [
-              // Background image (high opacity now)
+              // Background image (high opacity)
               if (promo.imageUrl != null)
                 Positioned.fill(
                   child: CachedNetworkImage(
@@ -531,12 +553,11 @@ class _PromoCard extends StatelessWidget {
                             letterSpacing: -0.3,
                           ),
                         ),
-                        if (promo.description != null &&
-                            promo.description!.isNotEmpty)
+                        if (promo.description.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
-                              promo.description!,
+                              promo.description,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -559,7 +580,6 @@ class _PromoCard extends StatelessWidget {
   }
 }
 
-// ─── Hot Deals Section ────────────────────────────────────────────────────────
 class _DealsSection extends StatelessWidget {
   final List<Product> products;
   const _DealsSection({required this.products});
@@ -610,7 +630,7 @@ class _DealCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Left – Image area with discount badge
+            // Left area with discount badge
             Stack(
               clipBehavior: Clip.none,
               children: [
@@ -664,7 +684,7 @@ class _DealCard extends StatelessWidget {
               ],
             ),
 
-            // Right – Text info
+            // Right area info
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(14),
@@ -685,7 +705,7 @@ class _DealCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
 
-                    // Original price (strikethrough)
+                    // Original price
                     Text(
                       '\$${product.sellingPrice.toStringAsFixed(2)}',
                       style: const TextStyle(
@@ -743,7 +763,6 @@ class _DealCard extends StatelessWidget {
       );
 }
 
-// ─── Standard Product Card ─────────────────────────────────────────────────────
 class _ProductCard extends StatelessWidget {
   final Product product;
   const _ProductCard({required this.product});

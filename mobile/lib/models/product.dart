@@ -15,6 +15,7 @@ class Product {
   final double? discountPrice;
   final DateTime? discountStartDate;
   final DateTime? discountEndDate;
+  final bool isPromotion;
 
   bool get isOnDiscount {
     final now = DateTime.now();
@@ -41,6 +42,7 @@ class Product {
     this.discountPrice,
     this.discountStartDate,
     this.discountEndDate,
+    this.isPromotion = false,
   });
 
   int get discountPercentage {
@@ -53,17 +55,23 @@ class Product {
       isOnDiscount ? (discountPrice ?? sellingPrice) : sellingPrice;
 
   factory Product.fromJson(Map<String, dynamic> json) {
-    String? imageUrl = json['image_url'] as String?;
+    // Handle both Laravel standard keys and the "legacy/bridge" keys
+    final pId = json['product_id'] ?? json['p_id'];
+    final pName = json['name'] ?? json['p_name'];
+    final pImg = json['image_path'] ?? json['p_image'];
+    final isPromo = json['is_promotion'] == true || json['is_promotion'] == 1;
+
+    String? imageUrl = (json['image_url'] ?? json['url']) as String?;
     if (imageUrl != null && imageUrl.contains('localhost')) {
       imageUrl = imageUrl.replaceFirst('localhost', '127.0.0.1');
     }
 
     return Product(
-      productId: json['product_id'] as int,
-      name: json['name'] as String,
+      productId: pId as int,
+      name: pName as String,
       description: json['description'] as String?,
-      imagePath: json['image_path'] as String?,
-      imageUrl: imageUrl, // sanitized URL
+      imagePath: pImg as String?,
+      imageUrl: imageUrl,
       sellingPrice: double.parse(json['selling_price']?.toString() ?? '0'),
       currentStock: json['current_stock'] as int? ?? 0,
       averageRating: double.parse(json['average_rating']?.toString() ?? '0'),
@@ -81,6 +89,7 @@ class Product {
       discountEndDate: json['discount_end_date'] != null
           ? DateTime.parse(json['discount_end_date'] as String)
           : null,
+      isPromotion: isPromo,
     );
   }
 }
