@@ -2,11 +2,11 @@ name: Build Android APK
 
 on:
   push:
-    branches: [main]
+    branches: [main, production-bluehost]
     paths:
       - "mobile/**"
   pull_request:
-    branches: [main]
+    branches: [main, production-bluehost]
     paths:
       - "mobile/**"
   workflow_dispatch:
