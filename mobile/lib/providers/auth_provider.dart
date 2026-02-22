@@ -69,8 +69,6 @@ class AuthProvider extends ChangeNotifier {
     final result = await AuthService.forgotPassword(identifier);
     _isLoading = false;
     notifyListeners();
-    if (result['success'] == true)
-      return null; // null means success, message is handled by UI
     return result['message'] as String;
   }
 }
