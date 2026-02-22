@@ -1,9 +1,9 @@
 class ApiConstants {
   // Set this to true when deploying to production
-  static const bool isProduction = false;
+  static const bool isProduction = true;
 
-  // Replace with your Render/Production URL
-  static const String _prodUrl = 'https://somali-pos-backend.onrender.com';
+  // Replace with your Bluehost Domain URL (e.g., https://yourdomain.com)
+  static const String _prodUrl = 'https://yourdomain.com';
   static const String _devUrl =
       'http://127.0.0.1:8000'; // Change to PC IP if testing on physical device
 
