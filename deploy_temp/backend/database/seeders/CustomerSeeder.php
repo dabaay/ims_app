@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\CustomerApp;
 use Illuminate\Database\Seeder;
-use App\Models\Customer;
+use Illuminate\Support\Facades\Hash;
 
 class CustomerSeeder extends Seeder
 {
@@ -12,31 +13,17 @@ class CustomerSeeder extends Seeder
      */
     public function run(): void
     {
-        $customers = [
+        CustomerApp::updateOrCreate(
+            ['username' => 'testuser'],
             [
-                'full_name' => 'Cali Axmed Salaad',
-                'phone' => '0615112233',
-                'address' => 'Xamar Weyne, Muqdisho',
+                'full_name' => 'Test Customer',
+                'phone' => '252611111111',
+                'address' => 'Mogadishu, Somalia',
+                'password' => Hash::make('password123'),
                 'status' => 'active',
-            ],
-            [
-                'full_name' => 'Faadumo Jaamac',
-                'phone' => '0615998877',
-                'address' => 'Hodan, Muqdisho',
-                'status' => 'active',
-            ],
-            [
-                'full_name' => 'maanka',
-                'phone' => '683632095',
-                'status' => 'active',
-            ],
-        ];
-
-        foreach ($customers as $customer) {
-            Customer::updateOrCreate(
-                ['phone' => $customer['phone']],
-                $customer
-            );
-        }
+                'registration_date' => now(),
+                'current_balance' => 0.00,
+            ]
+        );
     }
 }
