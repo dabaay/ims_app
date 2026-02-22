@@ -4,7 +4,7 @@ services:
     env: php
     plan: free
     rootDir: backend
-    buildCommand: composer install --no-interaction --optimize-autoloader --no-dev && php artisan migrate --force
+    buildCommand: composer install --no-interaction --optimize-autoloader --no-dev && php artisan migrate --force && php artisan storage:link
     startCommand: php artisan serve --host 0.0.0.0 --port $PORT
     envVars:
       - key: APP_ENV
