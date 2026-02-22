@@ -1,0 +1,14 @@
+[
+  {
+    "id": "fix-unused-icon",
+    "title": "Fix Unused 'Icon' in ReportsPage.jsx",
+    "description": "Resolve the linting error where 'Icon' is reported as unused despite being used as a component. This often happens if the linter is confused by renaming in destructuring or if there's a typo.",
+    "steps": [
+      {
+        "description": "Rename 'icon: Icon' to 'icon: IconComponent' and use it accordingly.",
+        "command": "python -c \"import sys; content = open(r'c:\\Users\\Abdulrahman\\Desktop\\IMS\\somali-pos-system\\frontend\\src\\pages\\ReportsPage.jsx', 'r', encoding='utf-8').read(); content = content.replace('icon: Icon, color', 'icon: IconComponent, color').replace('<Icon size={24} />', '<IconComponent size={24} />'); open(r'c:\\Users\\Abdulrahman\\Desktop\\IMS\\somali-pos-system\\frontend\\src\\pages\\ReportsPage.jsx', 'w', encoding='utf-8').write(content)\"",
+        "safeToAutoRun": true
+      }
+    ]
+  }
+]
