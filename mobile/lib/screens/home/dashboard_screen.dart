@@ -6,7 +6,7 @@ import '../../models/product.dart';
 import '../../models/promotion.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
-import '../product/product_detail_screen.dart';
+import 'product_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -22,12 +22,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _dashFuture = ApiService.getDashboardData();
+    _dashFuture = ApiService.getDashboard();
   }
 
   void _refresh() {
     setState(() {
-      _dashFuture = ApiService.getDashboardData();
+      _dashFuture = ApiService.getDashboard();
     });
   }
 
@@ -160,7 +160,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           .toList() ??
                       [];
 
-                  final promotions = (data['promotions'] as List?)
+                  final promotionsData = (data['promotions'] as List?)
                           ?.map((e) =>
                               Promotion.fromJson(e as Map<String, dynamic>))
                           .where((p) => p.isActive)
@@ -183,7 +183,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       .toList();
 
                   // Combine them
-                  final allPromos = [...promotions, ...productPromos];
+                  final allPromos = [...promotionsData, ...productPromos];
 
                   // Active discounts filter
                   final activeDiscounts =
@@ -450,7 +450,7 @@ class _PromoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (promo.productId != null && (promo.product != null)) {
+        if (promo.productId != null && promo.product != null) {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) => ProductDetailScreen(product: promo.product!),
@@ -479,7 +479,7 @@ class _PromoCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           child: Stack(
             children: [
-              // Background image (high opacity)
+              // Background image
               if (promo.imageUrl != null)
                 Positioned.fill(
                   child: CachedNetworkImage(
@@ -553,11 +553,12 @@ class _PromoCard extends StatelessWidget {
                             letterSpacing: -0.3,
                           ),
                         ),
-                        if (promo.description.isNotEmpty)
+                        if (promo.description != null &&
+                            promo.description!.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
-                              promo.description,
+                              promo.description!,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -630,7 +631,7 @@ class _DealCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Left area with discount badge
+            // Left area
             Stack(
               clipBehavior: Clip.none,
               children: [
