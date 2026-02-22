@@ -194,10 +194,10 @@ use App\Http\Controllers\Api\Mobile\StoreInfoController as MobileStoreInfoContro
 use App\Http\Controllers\Api\Mobile\ChatController as MobileChatController;
 
 Route::prefix('mobile')->group(function () {
-
     // Public routes
-    Route::post('/register', [MobileAuthController::class, 'register']);
-    Route::post('/login',    [MobileAuthController::class, 'login']);
+    Route::post('/register',        [MobileAuthController::class, 'register']);
+    Route::post('/login',           [MobileAuthController::class, 'login']);
+    Route::post('/forgot-password', [MobileAuthController::class, 'forgotPassword']);
 
     // Protected routes (customer Sanctum token)
     Route::middleware('auth:customer')->group(function () {

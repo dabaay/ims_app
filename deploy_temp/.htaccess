@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    # Forward all traffic to the React frontend by default
+    RewriteRule ^$ frontend/index.html [L]
+    
+    # Map static assets and routing for the frontend
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} !^/backend
+    RewriteRule ^(.*)$ frontend/$1 [L]
+    
+    # Explicitly map API requests to the Laravel backend
+    RewriteCond %{REQUEST_URI} ^/api
+    RewriteRule ^api/(.*)$ backend/public/index.php [L]
+</IfModule>

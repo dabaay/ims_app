@@ -111,4 +111,29 @@ class AuthController extends Controller
             'message' => 'Password changed successfully',
         ]);
     }
+
+    public function forgotPassword(Request $request)
+    {
+        $request->validate([
+            'username_or_phone' => 'required|string',
+        ]);
+
+        $customer = CustomerApp::where('username', $request->username_or_phone)
+            ->orWhere('phone', $request->username_or_phone)
+            ->first();
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No account found with this information',
+            ], 404);
+        }
+
+        // In a real app, you would send an SMS/Email.
+        // For this system, we return a success message and allow a "Mock" reset.
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset request received. Please contact the administrator at +252 61xxxxxxx to verify your identity and get a temporary password.',
+        ]);
+    }
 }

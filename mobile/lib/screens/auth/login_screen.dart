@@ -112,7 +112,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           validator: (v) =>
                               v!.length < 6 ? 'Min 6 characters' : null,
                         ),
-                        const SizedBox(height: 24),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: _showForgotPasswordDialog,
+                            child: const Text('Forgot Password?',
+                                style: TextStyle(color: Color(0xFF1565C0))),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
                         SizedBox(
                           width: double.infinity,
                           height: 52,
@@ -170,6 +178,63 @@ class _LoginScreenState extends State<LoginScreen> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Color(0xFF1565C0), width: 2),
+      ),
+    );
+  }
+
+  void _showForgotPasswordDialog() {
+    final ctrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Forgot Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+                'Enter your username or phone number to receive instructions.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: ctrl,
+              decoration: _inputDecoration('Username or Phone', Icons.person),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () async {
+              final val = ctrl.text.trim();
+              if (val.isEmpty) return;
+              Navigator.pop(ctx);
+              final err =
+                  await context.read<AuthProvider>().forgotPassword(val);
+              if (!mounted) return;
+              if (err == null) {
+                _showStatusDialog('Success',
+                    'Password reset request received. Please contact the administrator to verify your identity.');
+              } else {
+                _showStatusDialog('Error', err);
+              }
+            },
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showStatusDialog(String title, String msg) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Text(msg),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('OK'))
+        ],
       ),
     );
   }
