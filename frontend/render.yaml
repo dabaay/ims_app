@@ -1,0 +1,6 @@
+services:
+  - type: static
+    name: ims-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    publishPath: dist

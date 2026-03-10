@@ -184,7 +184,7 @@ const ExpensesPage = () => {
                 )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="bg-secondary/40 border border-slate-700 p-6 rounded-2xl backdrop-blur-sm">
                     <div className="flex justify-between items-start mb-4">
                         <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400">
@@ -194,6 +194,18 @@ const ExpensesPage = () => {
                     <div>
                         <p className="text-slate-500 text-sm font-bold uppercase tracking-wider">Bishaan (Month)</p>
                         <h3 className="text-2xl font-black text-white">${totalThisMonth.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                    </div>
+                </div>
+
+                <div className="bg-secondary/40 border border-slate-700 p-6 rounded-2xl backdrop-blur-sm">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-3 rounded-xl bg-rose-500/10 text-rose-400">
+                            <TrendingDown size={24} />
+                        </div>
+                    </div>
+                    <div>
+                        <p className="text-slate-500 text-sm font-bold uppercase tracking-wider">Wadarta Guud (Total Spent)</p>
+                        <h3 className="text-2xl font-black text-white">${expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
                     </div>
                 </div>
 

@@ -17,6 +17,8 @@ class CustomerApp extends Authenticatable
         'full_name',
         'username',
         'phone',
+        'hormuud_number',
+        'edahaba_number',
         'address',
         'password',
         'profile_image',
@@ -30,7 +32,6 @@ class CustomerApp extends Authenticatable
     ];
 
     protected $hidden = [
-        'password',
         'remember_token',
     ];
 

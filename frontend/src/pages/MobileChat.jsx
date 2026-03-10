@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../api/axios';
-import { MessageCircle, Send, Image, X, ChevronLeft, Package, CheckCircle } from 'lucide-react';
-
-const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+import { MessageCircle, Send, Image, X, ChevronLeft, Package, CheckCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
+const getStorageUrl = (path) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    const base = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '');
+    return `${base}/storage/${path}`;
+};
 const formatTime = (dt) =>
     new Date(dt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -85,7 +89,6 @@ const ChatBubble = ({ msg, onImport }) => {
 
 // ─── Import Product Modal ─────────────────────────────────────────────────────
 const ImportProductModal = ({ msg, onClose }) => {
-    const API_BASE_MODAL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
     const [form, setForm] = useState({ name: '', category: '', selling_price: '', current_stock: '0' });
     const [submitting, setSubmitting] = useState(false);
     const [done, setDone] = useState(false);
@@ -140,7 +143,7 @@ const ImportProductModal = ({ msg, onClose }) => {
                     <form onSubmit={handleSubmit} className="p-5 space-y-4">
                         {/* Image preview */}
                         <div className="w-full h-40 rounded-xl overflow-hidden border border-slate-600 bg-slate-900">
-                            <img src={msg.image_url} alt="preview" className="w-full h-full object-contain" />
+                            <img src={getStorageUrl(msg.image_path) || msg.image_url} alt="preview" className="w-full h-full object-contain" />
                         </div>
 
                         <div>
@@ -410,9 +413,16 @@ const MobileChat = () => {
                                             lastMsg && <span className="text-[10px] text-slate-400 shrink-0 ml-2">{formatTime(lastMsg.created_at)}</span>
                                         )}
                                     </div>
-                                    <p className={`text-xs truncate mt-0.5 ${unread > 0 && !isActive ? 'text-white font-semibold' : 'text-slate-400'}`}>
-                                        {hasImg ? '📷 Photo' : (lastMsg?.message || 'No messages yet')}
-                                    </p>
+                                    <div className="flex justify-between items-center mt-0.5">
+                                        <p className={`text-xs truncate ${unread > 0 && !isActive ? 'text-white font-semibold' : 'text-slate-400'}`}>
+                                            {hasImg ? '📷 Photo' : (lastMsg?.message || 'No messages yet')}
+                                        </p>
+                                        {chat.customer?.last_rating !== null && (
+                                            chat.customer?.last_rating ? 
+                                            <ThumbsUp size={12} className="text-[#25D366] opacity-70" /> : 
+                                            <ThumbsDown size={12} className="text-rose-400 opacity-70" />
+                                        )}
+                                    </div>
                                     {chat.chat_status === 'closed' && (
                                         <span className="text-[9px] font-bold text-orange-400 uppercase tracking-widest">Closed</span>
                                     )}
@@ -439,7 +449,14 @@ const MobileChat = () => {
                                 {selectedChat.customer?.full_name?.[0] || '?'}
                             </div>
                             <div className="flex-1">
-                                <p className="font-semibold text-white capitalize leading-tight">{selectedChat.customer?.full_name}</p>
+                                <p className="font-semibold text-white capitalize leading-tight flex items-center gap-2">
+                                    {selectedChat.customer?.full_name}
+                                    {selectedChat.customer?.last_rating !== null && (
+                                        selectedChat.customer?.last_rating ? 
+                                        <ThumbsUp size={14} className="text-[#25D366]" /> : 
+                                        <ThumbsDown size={14} className="text-rose-400" />
+                                    )}
+                                </p>
                                 <p className={`text-xs font-semibold ${chatStatus === 'closed' ? 'text-orange-400' : 'text-[#25D366]'}`}>
                                     {chatStatus === 'closed' ? 'Chat Closed' : 'Active'}
                                 </p>

@@ -44,6 +44,8 @@ class OrderController extends Controller
             $subtotal = 0;
             $itemsData = [];
 
+            $deliveryFee = (float)(\App\Models\SystemSetting::where('setting_key', 'delivery_fee')->value('setting_value') ?? 2.00);
+
             foreach ($items as $item) {
                 // Only allow active products for sale
                 $product = Product::where('is_active', true)->findOrFail($item['product_id']);
@@ -80,9 +82,9 @@ class OrderController extends Controller
                 'subtotal'              => $subtotal,
                 'discount_amount'       => 0,
                 'tax_amount'            => 0,
-                'total_amount'          => $subtotal,
+                'total_amount'          => $subtotal + $deliveryFee,
                 'amount_paid'           => 0,
-                'balance_due'           => $subtotal,
+                'balance_due'           => $subtotal + $deliveryFee,
                 'payment_method'        => $request->payment_method,
                 'payment_status'        => 'pending',
                 'transaction_reference' => $request->transaction_reference,
@@ -91,11 +93,12 @@ class OrderController extends Controller
                 'customer_name'         => $request->customer_name ?? $customer->full_name,
                 'customer_phone'        => $request->customer_phone ?? $customer->phone,
                 'customer_address'      => $request->customer_address,
+                'delivery_price'        => $deliveryFee,
             ]);
 
             // Increment customer balance (debt)
             if ($customer) {
-                $customer->increment('current_balance', (float)$subtotal);
+                $customer->increment('current_balance', (float)$sale->total_amount);
             }
 
             foreach ($itemsData as $itemData) {

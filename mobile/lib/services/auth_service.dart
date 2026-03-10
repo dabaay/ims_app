@@ -6,18 +6,23 @@ import '../models/customer.dart';
 import 'api_service.dart';
 
 class AuthService {
-  static Future<Map<String, dynamic>> login(String username, String password) async {
+  static Future<Map<String, dynamic>> login(
+      String username, String password) async {
     try {
       final res = await http.post(
         Uri.parse('$kBaseUrl/login'),
-        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: jsonEncode({'username': username, 'password': password}),
       );
 
       final data = jsonDecode(res.body) as Map<String, dynamic>;
       if (res.statusCode == 200 && data['success'] == true) {
-        final token    = data['data']['token'] as String;
-        final customer = Customer.fromJson(data['data']['customer'] as Map<String, dynamic>);
+        final token = data['data']['token'] as String;
+        final customer =
+            Customer.fromJson(data['data']['customer'] as Map<String, dynamic>);
         await _saveSession(token, customer.customerId);
         ApiService.setToken(token);
         return {'success': true, 'customer': customer};
@@ -29,18 +34,23 @@ class AuthService {
     }
   }
 
-  static Future<Map<String, dynamic>> register(Map<String, dynamic> userData) async {
+  static Future<Map<String, dynamic>> register(
+      Map<String, dynamic> userData) async {
     try {
       final res = await http.post(
         Uri.parse('$kBaseUrl/register'),
-        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: jsonEncode(userData),
       );
 
       final data = jsonDecode(res.body) as Map<String, dynamic>;
       if (res.statusCode == 201 && data['success'] == true) {
-        final token    = data['data']['token'] as String;
-        final customer = Customer.fromJson(data['data']['customer'] as Map<String, dynamic>);
+        final token = data['data']['token'] as String;
+        final customer =
+            Customer.fromJson(data['data']['customer'] as Map<String, dynamic>);
         await _saveSession(token, customer.customerId);
         ApiService.setToken(token);
         return {'success': true, 'customer': customer};
@@ -52,7 +62,34 @@ class AuthService {
         final msg = (errors.values.first as List).first.toString();
         return {'success': false, 'message': msg};
       }
-      return {'success': false, 'message': data['message'] ?? 'Registration failed'};
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Registration failed'
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Network error. Please try again.'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> forgotPassword(String identifier) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$kBaseUrl/forgot-password'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: jsonEncode({'username_or_phone': identifier}),
+      );
+
+      final data = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && data['success'] == true) {
+        return {'success': true, 'message': data['message']};
+      }
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Record not found'
+      };
     } catch (e) {
       return {'success': false, 'message': 'Network error. Please try again.'};
     }

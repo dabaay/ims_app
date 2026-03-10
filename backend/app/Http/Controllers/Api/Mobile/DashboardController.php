@@ -88,10 +88,18 @@ class DashboardController extends Controller
             unset($product->favorites, $product->ratings);
         }
 
+        /** @var array<int, string> $categories */
+        $categories = Product::where('is_active', true)
+            ->whereNotNull('category')
+            ->distinct()
+            ->pluck('category')
+            ->toArray();
+
         return response()->json([
             'success' => true,
             'data'    => [
                 'promotions'         => $promotions,
+                'categories'         => $categories,
                 'trending_products'  => $trendingProducts,
                 'new_products'       => $newProducts,
                 'discounted_products' => $discountedProducts,

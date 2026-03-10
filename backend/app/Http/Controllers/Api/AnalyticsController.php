@@ -236,7 +236,6 @@ class AnalyticsController extends Controller
         $mostExpensive = DB::table('products')
             ->where('is_active', true)
             ->orderBy('selling_price', 'desc')
-            ->limit(5)
             ->get(['name', 'selling_price']);
 
         // 3. Most Frequently Purchased Products (Filtered by Date)
@@ -247,7 +246,6 @@ class AnalyticsController extends Controller
             ->whereBetween('sales.sale_date', [$startDate, $endDate])
             ->groupBy('products.product_id', 'products.name')
             ->orderBy('total_qty', 'desc')
-            ->limit(5)
             ->get();
 
         // 4. Stagnant Stock (Never purchased within date range)

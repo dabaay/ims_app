@@ -10,17 +10,12 @@ Welcome to your unified Integrated Management System (IMS) and Mobile App reposi
 
 ## 🚀 Deployment Overview
 
-### Backend (Render.com)
+### Backend & Frontend (Render.com)
 
-The backend is configured via `render.yaml`. It automatically handles:
+The system is hosted on Render.com. The backend handles API requests while the frontend serves the manager panel.
 
-- Dependency installation (`composer install`)
-- Database migrations (`php artisan migrate`)
-- Storage linking (`php artisan storage:link`)
-
-### Frontend (Vercel)
-
-The manager panel is deployed to Vercel. Ensure you point the **Root Directory** to `frontend` during setup.
+- **Backend**: Configured via `render.yaml`. Automatically handles dependency installation, database migrations, and storage linking.
+- **Frontend**: Configured for static hosting on Render.
 
 ### Mobile App (GitHub Actions)
 
