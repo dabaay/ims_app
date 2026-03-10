@@ -10,12 +10,14 @@ Welcome to your unified Integrated Management System (IMS) and Mobile App reposi
 
 ## 🚀 Deployment Overview
 
-### Backend & Frontend (Render.com)
+### Backend & Frontend (Vercel & Render.com)
 
-The system is hosted on Render.com. The backend handles API requests while the frontend serves the manager panel.
+The system is hosted on Vercel and Render.com.
 
+- **Vercel Build Optimization**: Both `frontend` and `backend` are optimized for Vercel with manual chunk splitting and explicit output directory configurations (`vercel.json`) to prevent build hangs and "dist folder not found" errors.
+- **Docker Environment (PHP 8.4)**: The backend Dockerfile is upgraded to PHP 8.4 with all required extensions (`zip`, `intl`, `pdo_pgsql`) to support Laravel 12 and PostgreSQL on Render.
 - **Backend**: Configured via `render.yaml`. Automatically handles dependency installation, database migrations, and storage linking.
-- **Frontend**: Configured for static hosting on Render.
+- **Frontend**: Configured for static hosting on Vercel and Render.
 
 ### Mobile App (GitHub Actions)
 
