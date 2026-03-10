@@ -1,4 +1,4 @@
 {
-  "public": false,
+  "outputDirectory": "dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
