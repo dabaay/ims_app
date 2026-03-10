@@ -73,11 +73,20 @@ class MobileManagerController extends Controller
         $customer = CustomerApp::findOrFail($id);
         $request->validate([
             'full_name' => 'sometimes|string|max:100',
+            'username'  => 'sometimes|string|max:50|unique:customerApp,username,' . $id . ',customer_id',
             'phone'     => 'sometimes|string|unique:customerApp,phone,' . $id . ',customer_id',
+            'address'   => 'nullable|string',
+            'password'  => 'nullable|string|min:6',
             'status'    => 'sometimes|string',
         ]);
 
-        $customer->update($request->all());
+        $data = $request->only(['full_name', 'username', 'phone', 'address', 'status']);
+        
+        if ($request->filled('password')) {
+            $data['password'] = $request->password;
+        }
+
+        $customer->update($data);
 
         return response()->json([
             'success' => true,

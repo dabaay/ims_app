@@ -86,67 +86,116 @@ const ReportsPage = () => {
     const handleDownloadPDF = async () => {
         if (!reportRef.current) return;
         setExporting('pdf');
+        
         try {
             await new Promise(r => setTimeout(r, 1000)); // Wait for charts to be ready
             
-            const element = reportRef.current;
-            const canvas = await html2canvas(element, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                logging: false,
-                letterRendering: true,
-                windowWidth: 1200,
-                onclone: (doc) => {
-                    const clone = doc.getElementById('report-container');
-                    if (clone) {
-                        clone.style.padding = '40px';
-                        clone.style.background = 'white';
-                        // Fix for Tailwind v4 colors
-                        // html2canvas fails on oklch/oklab as of v1.4.1
-                        const colorFixer = (node) => {
-                            if (node.nodeType === 1) {
-                                const style = window.getComputedStyle(node);
-                                const props = [
-                                    'color', 'backgroundColor', 'borderColor', 
-                                    'outlineColor', 'fill', 'stroke', 'boxShadow'
-                                ];
-
-                                props.forEach(prop => {
-                                    const val = style[prop];
-                                    if (val && (val.includes('oklch') || val.includes('oklab'))) {
-                                        if (prop.includes('borderColor')) node.style[prop] = '#cbd5e1';
-                                        else if (prop === 'backgroundColor') node.style[prop] = 'transparent';
-                                        else if (prop === 'color') node.style[prop] = '#1e293b';
-                                        else if (prop === 'boxShadow') node.style[prop] = 'none';
-                                        else node.style[prop] = 'inherit';
-                                    }
-                                });
-                                node.childNodes.forEach(colorFixer);
-                            }
-                        };
-                        colorFixer(clone);
-                    }
-                }
-            });
-
-            const imgData = canvas.toDataURL('image/png', 0.95);
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const imgHeight = (canvas.height * pageWidth) / canvas.width;
+            const margin = 10;
+            const contentWidth = pageWidth - (margin * 2);
 
-            let heightLeft = imgHeight;
-            let position = 0;
+            const sections = [
+                { id: 'print-header', title: 'Header' },
+                { id: 'section-daily', title: 'Daily Summary' },
+                { id: 'section-dashboard', title: 'Dashboard' },
+                { id: 'section-sales', title: 'Sales' },
+                { id: 'section-stock', title: 'Stock' },
+                { id: 'section-finance', title: 'Finance' },
+                { id: 'section-debt', title: 'Debt' },
+                { id: 'print-footer', title: 'Footer' }
+            ];
 
-            pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight, undefined, 'FAST');
-            heightLeft -= pageHeight;
+            let currentY = margin;
 
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight, undefined, 'FAST');
-                heightLeft -= pageHeight;
+            for (const section of sections) {
+                const element = document.getElementById(section.id);
+                if (!element) continue;
+
+                // Removed forced page breaks for major sections to allow layout optimization and space packing
+                // The dynamic height check inside the capture loop will handle page splitting if a section doesn't fit.
+
+
+                try {
+                    const canvas = await html2canvas(element, {
+                        scale: 1.5,
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        logging: false,
+                        onclone: (doc) => {
+                            const clone = doc.getElementById(section.id);
+                            if (clone) {
+                                clone.style.padding = '20px';
+                                clone.classList.remove('hidden', 'print:hidden');
+                                clone.style.display = 'block';
+                                clone.style.background = '#ffffff';
+                                clone.style.color = '#1e3a8a';
+                                
+                                const style = doc.createElement('style');
+                                style.innerHTML = `
+                                    * { 
+                                        color: #1e3a8a !important;
+                                        border-color: #e2e8f0 !important;
+                                        text-shadow: none !important;
+                                        box-shadow: none !important;
+                                    }
+                                    h1, h2, h3 { color: #1e3a8a !important; font-weight: 800 !important; }
+                                    .text-slate-400, .text-gray-400, .text-slate-300 { color: #64748b !important; }
+                                    .text-emerald-400, .text-emerald-600 { color: #059669 !important; }
+                                    .text-rose-400, .text-rose-600 { color: #dc2626 !important; }
+                                    .text-blue-400, .text-blue-500 { color: #2563eb !important; }
+                                    .bg-slate-800, .bg-slate-700, .bg-slate-800\\/50 { background-color: #f8fafc !important; }
+                                    .bg-emerald-500\\/10 { background-color: #ecfdf5 !important; }
+                                    .bg-emerald-500\\/5 { background-color: #f0fdf9 !important; }
+                                    .border-emerald-500\\/20 { border-color: #a7f3d0 !important; }
+                                `;
+                                doc.head.appendChild(style);
+                            }
+                        }
+                    });
+
+                    const imgData = canvas.toDataURL('image/png', 0.8);
+                    const imgWidth = contentWidth;
+                    const imgHeight = (canvas.height * contentWidth) / canvas.width;
+
+                    // Handle tall sections that might span multiple pages
+                    let remainingHeight = imgHeight;
+                    let sourceY = 0; // The Y position offset in mm
+                    const pageMaxHeight = 280; // Total usable height
+
+                    // If section is too tall for remaining space, and not already at top, move to next page
+                    if (currentY + imgHeight > pageMaxHeight && currentY > margin) {
+                        pdf.addPage();
+                        currentY = margin;
+                    }
+
+                    while (remainingHeight > 0) {
+                        const h = Math.min(remainingHeight, pageMaxHeight - currentY);
+                        
+                        pdf.addImage(
+                            imgData, 
+                            'PNG', 
+                            margin, 
+                            currentY - sourceY, 
+                            imgWidth, 
+                            imgHeight, 
+                            undefined, 
+                            'FAST'
+                        );
+
+                        remainingHeight -= h;
+                        if (remainingHeight > 0) {
+                            pdf.addPage();
+                            currentY = margin;
+                            sourceY += h;
+                        } else {
+                            currentY += h + 5;
+                        }
+                    }
+                } catch (err) {
+                    console.error(`Error capturing section ${section.id}:`, err);
+                    // Continue with other sections if one fails
+                }
             }
 
             pdf.save(`Operational_Report_${startDate}_to_${endDate}.pdf`);
@@ -289,7 +338,7 @@ const ReportsPage = () => {
             {/* Report Content for Capture */}
             <div id="report-container" ref={reportRef} className="space-y-8">
                 {/* Print Header */}
-                <div className="hidden print:block border-b-2 border-slate-300 pb-6 mb-8 text-slate-800">
+                <div id="print-header" className="hidden print:block border-b-2 border-slate-300 pb-6 mb-8 text-slate-800">
                     <div className="text-center">
                         <div className="flex justify-center mb-4">
                             <div className="w-20 h-20 bg-slate-100 text-slate-800 rounded-full flex items-center justify-center font-black text-2xl overflow-hidden shadow-sm border border-slate-200">
@@ -328,7 +377,7 @@ const ReportsPage = () => {
                 </div>
 
                 {/* 0. DAILY OPERATIONAL SUMMARY (WALPO FOCUS) */}
-                <section className="bg-blue-600 p-8 rounded-2xl shadow-2xl border border-blue-400 relative overflow-hidden print:bg-white print:border-gray-300 print:shadow-none">
+                <section id="section-daily" className="bg-blue-600 p-8 rounded-2xl shadow-2xl border border-blue-400 relative overflow-hidden print:bg-white print:border-gray-300 print:shadow-none">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
                     
                     <div className="relative z-10">
@@ -396,7 +445,7 @@ const ReportsPage = () => {
                 </section>
 
                 {/* 1. DASHBOARD SECTION */}
-            <section className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 print:bg-white print:border-gray-300 print:shadow-none">
+            <section id="section-dashboard" className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 print:bg-white print:border-gray-300 print:shadow-none">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700 print:border-gray-300">
                     <span className="text-2xl">📊</span>
                     <h2 className="text-2xl font-bold text-white print:text-gray-900">DASHBOARD - Koobka Guud</h2>
@@ -438,7 +487,7 @@ const ReportsPage = () => {
             </section>
 
             {/* 2. SALES SECTION */}
-            <section className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 print:bg-white print:border-gray-300 print:shadow-none print:page-break-before-always">
+            <section id="section-sales" className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 print:bg-white print:border-gray-300 print:shadow-none print:page-break-before-always">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700 print:border-gray-300">
                     <span className="text-2xl">📈</span>
                     <h2 className="text-2xl font-bold text-white print:text-gray-900">SALES - Iibka</h2>
@@ -486,7 +535,7 @@ const ReportsPage = () => {
                                 <span className="font-bold text-white print:text-gray-900">${Number(analytics.comprehensive?.posIncome?.evc || 0).toFixed(2)}</span>
                             </div>
                             <div className="bg-slate-800 p-3 rounded-lg flex justify-between items-center border border-slate-700 print:border-gray-200 print:bg-gray-50">
-                                <span className="text-slate-300 print:text-gray-700">🇸🇴 Shilin</span>
+                                <span className="text-slate-300 print:text-gray-700">🇸🇴 Shilling</span>
                                 <span className="font-bold text-white print:text-gray-900">${Number(analytics.comprehensive?.posIncome?.shilin || 0).toFixed(2)}</span>
                             </div>
                         </div>
@@ -533,7 +582,7 @@ const ReportsPage = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {(analytics.comprehensive?.mostPurchased || []).slice(0, 10).map((product, idx) => (
+                                {(analytics.comprehensive?.mostPurchased || []).map((product, idx) => (
                                     <tr key={idx} className="border-b border-slate-700/30 print:border-gray-200">
                                         <td className="p-3 text-white print:text-gray-900">{product.name}</td>
                                         <td className="p-3 text-right text-white print:text-gray-900 font-bold">{product.total_qty}</td>
@@ -571,10 +620,48 @@ const ReportsPage = () => {
                         </table>
                     </div>
                 </div>
+                {/* Product Profitability Analysis */}
+                <div className="mt-8 break-inside-avoid">
+                    <h3 className="text-lg font-bold print:text-gray-900 mb-3 text-emerald-400">Maxfaca Alaabta (Product Profitability)</h3>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead className="bg-emerald-500/10">
+                                <tr className="text-white print:text-gray-900">
+                                    <th className="p-4 text-left font-black uppercase tracking-widest text-[10px] border-b border-emerald-500/20">Alaabta (Product)</th>
+                                    <th className="p-4 text-right font-black uppercase tracking-widest text-[10px] border-b border-emerald-500/20">Iibka (Revenue)</th>
+                                    <th className="p-4 text-right font-black uppercase tracking-widest text-[10px] border-b border-emerald-500/20">Kharashka (Cost)</th>
+                                    <th className="p-4 text-right font-black uppercase tracking-widest text-[10px] border-b border-emerald-500/20 text-emerald-400">Faa'iidada (Profit)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {(stats?.profit_by_product || []).map((item, idx) => (
+                                    <tr key={idx} className="border-b border-slate-700/30 hover:bg-white/5 transition-colors print:border-gray-200">
+                                        <td className="p-4 text-white print:text-gray-900 font-bold">{item.name}</td>
+                                        <td className="p-4 text-right font-mono text-slate-300 print:text-gray-700">${(parseFloat(item.revenue) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                        <td className="p-4 text-right font-mono text-slate-400 print:text-gray-600">${(parseFloat(item.cost) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                        <td className="p-4 text-right font-black text-emerald-400 print:text-emerald-600 font-mono">
+                                            +${(parseFloat(item.profit) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                            <tfoot className="bg-emerald-500/5">
+                                <tr className="text-white print:text-gray-900">
+                                    <td className="p-4 font-black text-[10px] uppercase">Wadarta Guud (Grand Total)</td>
+                                    <td className="p-4 text-right font-bold">${(stats?.profit_by_product?.reduce((sum, item) => sum + (parseFloat(item.revenue) || 0), 0) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                    <td className="p-4 text-right font-bold">${(stats?.profit_by_product?.reduce((sum, item) => sum + (parseFloat(item.cost) || 0), 0) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                    <td className="p-4 text-right font-black text-emerald-400 print:text-emerald-600">
+                                        ${(stats?.profit_by_product?.reduce((sum, item) => sum + (parseFloat(item.profit) || 0), 0) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
             </section>
 
             {/* 3. STOCK SECTION */}
-            <section className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 print:bg-white print:border-gray-300 print:shadow-none print:page-break-before-always">
+            <section id="section-stock" className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 print:bg-white print:border-gray-300 print:shadow-none print:page-break-before-always">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700 print:border-gray-300">
                     <span className="text-2xl">📦</span>
                     <h2 className="text-2xl font-bold text-white print:text-gray-900">STOCK - Alaabta</h2>
@@ -621,7 +708,7 @@ const ReportsPage = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {(analytics.comprehensive?.stagnantStock || []).slice(0, 10).map((item, idx) => (
+                                {(analytics.comprehensive?.stagnantStock || []).map((item, idx) => (
                                     <tr key={idx} className="border-b border-slate-700/30 print:border-gray-200">
                                         <td className="p-3 text-white print:text-gray-900">{item.name}</td>
                                         <td className="p-3 text-right text-white print:text-gray-900 font-bold">{item.current_stock}</td>
@@ -663,7 +750,7 @@ const ReportsPage = () => {
             </section>
 
             {/* 4. FINANCE SECTION */}
-            <section className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 print:bg-white print:border-gray-300 print:shadow-none print:page-break-before-always">
+            <section id="section-finance" className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 print:bg-white print:border-gray-300 print:shadow-none print:page-break-before-always">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700 print:border-gray-300">
                     <span className="text-2xl">💵</span>
                     <h2 className="text-2xl font-bold text-white print:text-gray-900">FINANCE - Maaliyadda</h2>
@@ -733,7 +820,7 @@ const ReportsPage = () => {
             </section>
 
             {/* 5. DEBT SECTION */}
-            <section className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 print:bg-white print:border-gray-300 print:shadow-none print:page-break-before-always">
+            <section id="section-debt" className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 print:bg-white print:border-gray-300 print:shadow-none print:page-break-before-always">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700 print:border-gray-300">
                     <span className="text-2xl">💳</span>
                     <h2 className="text-2xl font-bold text-white print:text-gray-900">DEBT - Deynta (Walpo)</h2>
@@ -803,7 +890,7 @@ const ReportsPage = () => {
             </section>
 
                 {/* Print Footer */}
-                <div className="hidden print:block text-center text-xs text-gray-500 mt-8 pt-4 border-t border-gray-300">
+                <div id="print-footer" className="hidden print:block text-center text-xs text-gray-500 mt-8 pt-4 border-t border-gray-300">
                     <p>End of Report - Generated by Somali POS System</p>
                 </div>
             </div>

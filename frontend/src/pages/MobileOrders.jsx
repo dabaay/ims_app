@@ -43,10 +43,18 @@ const MobileOrders = () => {
         ? orders 
         : orders.filter(o => o.payment_status === statusFilter);
 
+    const getStorageUrl = (path) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        const base = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '');
+        return `${base}/storage/${path}`;
+    };
+
     const handlePrintReceipt = (sale) => {
         const printWindow = window.open('', '_blank');
         
-        const logoHtml = settings.store_logo ? `<img class="logo" src="http://localhost:8000/storage/${settings.store_logo}" onerror="this.style.display='none'" />` : '';
+        const logoUrl = getStorageUrl(settings.store_logo);
+        const logoHtml = logoUrl ? `<img class="logo" src="${logoUrl}" onerror="this.style.display='none'" />` : '';
         
         const itemsHtml = (sale.items || []).map(item => `
             <tr>
@@ -143,6 +151,16 @@ const MobileOrders = () => {
                     </table>
 
                     <div class="total-section">
+                        <div class="total-row">
+                            <span>SUBTOTAL:</span>
+                            <span>$${parseFloat(sale.subtotal || 0).toFixed(2)}</span>
+                        </div>
+                        ${sale.delivery_price > 0 ? `
+                        <div class="total-row">
+                            <span>DELIVERY:</span>
+                            <span>$${parseFloat(sale.delivery_price).toFixed(2)}</span>
+                        </div>
+                        ` : ''}
                         <div class="total-row grand-total">
                             <span>TOTAL:</span>
                             <span>$${parseFloat(sale.total_amount || 0).toFixed(2)}</span>
@@ -236,13 +254,24 @@ const MobileOrders = () => {
                                         Cinwaanka: {order.customer_address}
                                     </p>
                                 )}
+                                {order.delivery_price > 0 && (
+                                    <div className="flex items-center space-x-1.5 mt-1.5 grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all">
+                                        <div className="bg-cyan-500/10 text-cyan-400 text-[9px] font-black px-2 py-0.5 rounded-md border border-cyan-500/20 uppercase tracking-widest">
+                                            Delivery: ${order.delivery_price}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        <div className="flex items-center space-x-12">
+                        <div className="flex items-center space-x-8">
                             <div className="text-right">
-                                <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Total Amount</p>
-                                <p className="text-xl font-black text-white">${order.total_amount}</p>
+                                <p className="text-[9px] text-slate-500 font-bold uppercase mb-0.5 whitespace-nowrap">Total Amount</p>
+                                <p className="text-lg font-black text-white leading-none">${order.total_amount}</p>
+                            </div>
+                            <div className="text-right border-l border-slate-700/50 pl-8">
+                                <p className="text-[9px] text-slate-500 font-bold uppercase mb-0.5 whitespace-nowrap">Amount Paid</p>
+                                <p className="text-lg font-black text-emerald-400 leading-none">${order.amount_paid}</p>
                             </div>
                             <div className="text-right">
                                 <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Status</p>

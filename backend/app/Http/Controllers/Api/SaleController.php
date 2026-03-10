@@ -63,6 +63,7 @@ class SaleController extends Controller
 
                 $sale->items()->create([
                     'product_id' => $item['product_id'],
+                    'product_name' => $product->name,
                     'quantity' => $item['quantity'],
                     'unit_price' => $price,
                     'subtotal' => $lineSubtotal,

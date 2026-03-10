@@ -31,6 +31,7 @@ class Product extends Model
         'discount_price',
         'discount_start_date',
         'discount_end_date',
+        'is_promotion',
     ];
 
     protected $casts = [
@@ -42,6 +43,7 @@ class Product extends Model
         'discount_price' => 'decimal:2',
         'discount_start_date' => 'datetime',
         'discount_end_date' => 'datetime',
+        'is_promotion' => 'boolean',
     ];
 
     protected $appends = ['image_url', 'is_on_discount', 'active_price'];
@@ -84,4 +86,3 @@ class Product extends Model
         return $this->hasMany(ProductRating::class, 'product_id', 'product_id');
     }
 }
-

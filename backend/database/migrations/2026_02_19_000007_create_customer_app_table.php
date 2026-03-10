@@ -13,6 +13,8 @@ return new class extends Migration
             $table->string('full_name');
             $table->string('username')->unique();
             $table->string('phone')->unique();
+            $table->string('hormuud_number')->nullable();
+            $table->string('edahaba_number')->nullable();
             $table->string('address')->nullable();
             $table->string('password');
             $table->string('profile_image')->nullable();

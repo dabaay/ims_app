@@ -15,7 +15,8 @@ import {
     LineChart as LineIcon,
     TrendingDown,
     Package,
-    ShoppingCart
+    ShoppingCart,
+    Truck
 } from 'lucide-react';
 import { 
     AreaChart, 
@@ -163,6 +164,13 @@ const Dashboard = () => {
                             <p className="text-amber-400 text-xs font-bold uppercase mb-1">{t('inventory_value')}</p>
                             <h4 className="text-2xl font-black text-white">${stats?.system_overview?.inventory_value?.toLocaleString()}</h4>
                         </div>
+                        <div className="bg-cyan-600/10 border border-cyan-500/20 p-6 rounded-2xl backdrop-blur-sm relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-3 text-cyan-400 opacity-20 group-hover:opacity-100 transition-opacity">
+                                <Truck size={24} />
+                            </div>
+                            <p className="text-cyan-400 text-xs font-bold uppercase mb-1">Delivery Revenue</p>
+                            <h4 className="text-2xl font-black text-white">${stats?.system_overview?.total_delivery_revenue?.toLocaleString() || '0'}</h4>
+                        </div>
                     </>
                 )}
                 
@@ -190,6 +198,10 @@ const Dashboard = () => {
                             <p className="text-purple-400 text-xs font-bold uppercase mb-1">Executive Summary</p>
                             <h4 className="text-2xl font-black text-white group-hover:text-purple-400 transition-colors">Generate Report</h4>
                             <p className="text-[10px] text-slate-500 font-bold mt-2">DOWNLOAD PDF • EXCEL • WORD</p>
+                        </div>
+                        <div className="bg-rose-600/10 border border-rose-500/20 p-6 rounded-2xl backdrop-blur-sm">
+                            <p className="text-rose-400 text-xs font-bold uppercase mb-1">Total Expenses</p>
+                            <h4 className="text-2xl font-black text-white">${stats?.system_overview?.total_expenses?.toLocaleString()}</h4>
                         </div>
                         <div className="bg-rose-600/10 border border-rose-500/20 p-6 rounded-2xl backdrop-blur-sm">
                             <p className="text-rose-400 text-xs font-bold uppercase mb-1">{t('outstanding_debt')}</p>
@@ -525,6 +537,58 @@ const Dashboard = () => {
                             </BarChart>
                         </ResponsiveContainer>
                     </ChartCard>
+                </div>
+            </div>
+
+            {/* Product Profitability Analysis */}
+            <div className="bg-secondary/40 border border-slate-700 rounded-3xl overflow-hidden backdrop-blur-md shadow-2xl mb-8">
+                <div className="p-8 border-b border-slate-700 flex items-center justify-between bg-emerald-500/5">
+                    <div className="flex items-center space-x-3">
+                        <TrendingUp className="text-emerald-400" size={24} />
+                        <div>
+                            <h2 className="text-2xl font-bold text-white tracking-tight">Maxfaca Alaabta (Product Profitability)</h2>
+                            <p className="text-slate-500 text-sm">Breakdown of earnings per product</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-slate-800/50 text-slate-400 text-xs uppercase tracking-widest font-bold">
+                            <tr>
+                                <th className="px-8 py-5">Alaabta (Product Name)</th>
+                                <th className="px-8 py-5 text-right">Lacagta la iibiyay (Revenue)</th>
+                                <th className="px-8 py-5 text-right">Lacagta laga gooyay (Cost)</th>
+                                <th className="px-8 py-5 text-right text-emerald-400">Faa'iidada (Profit)</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-700/50">
+                            {stats?.profit_by_product?.map((item, index) => (
+                                <tr key={index} className="hover:bg-slate-800/30 transition-colors group">
+                                    <td className="px-8 py-4 font-bold text-slate-300">{item.name}</td>
+                                    <td className="px-8 py-4 text-right font-mono text-slate-400">${parseFloat(item.revenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                    <td className="px-8 py-4 text-right font-mono text-slate-400">${parseFloat(item.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                    <td className="px-8 py-4 text-right font-black text-emerald-400 font-mono tracking-tighter">
+                                        +${parseFloat(item.profit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                        <tfoot className="bg-emerald-500/10 border-t-2 border-emerald-500/30">
+                            <tr className="text-white font-black uppercase text-xs">
+                                <td className="px-8 py-6 tracking-widest">Wadarta Guud (Grand Total):</td>
+                                <td className="px-8 py-6 text-right text-slate-300">
+                                    ${(stats?.profit_by_product?.reduce((sum, item) => sum + (parseFloat(item.revenue) || 0), 0) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </td>
+                                <td className="px-8 py-6 text-right text-slate-300">
+                                    ${(stats?.profit_by_product?.reduce((sum, item) => sum + (parseFloat(item.cost) || 0), 0) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </td>
+                                <td className="px-8 py-6 text-right text-emerald-400 text-lg">
+                                    ${(stats?.profit_by_product?.reduce((sum, item) => sum + (parseFloat(item.profit) || 0), 0) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
 

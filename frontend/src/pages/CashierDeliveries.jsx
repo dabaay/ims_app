@@ -94,6 +94,21 @@ const CashierDeliveries = () => {
                                 />
                             ))}
                         </tbody>
+                        {filteredOrders.length > 0 && (
+                            <tfoot className="bg-slate-800/20">
+                                <tr className="border-t border-slate-700">
+                                    <td colSpan="3" className="p-4 text-right">
+                                        <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Grand Total:</span>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className="text-sm font-black text-blue-400 bg-blue-500/10 px-3 py-1 rounded-lg border border-blue-500/20">
+                                            ${filteredOrders.reduce((sum, order) => sum + (parseFloat(order.delivery_price) || 0), 0).toFixed(2)}
+                                        </span>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        )}
                     </table>
                 </div>
             </div>

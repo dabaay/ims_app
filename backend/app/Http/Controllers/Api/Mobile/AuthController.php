@@ -16,6 +16,8 @@ class AuthController extends Controller
             'full_name'             => 'required|string|max:100',
             'username'              => 'required|string|max:50|unique:customerApp,username',
             'phone'                 => 'required|string|unique:customerApp,phone',
+            'hormuud_number'        => 'nullable|string',
+            'edahaba_number'        => 'nullable|string',
             'address'               => 'nullable|string',
             'password'              => 'required|string|min:6|confirmed',
         ]);
@@ -24,6 +26,8 @@ class AuthController extends Controller
             'full_name'       => $request->full_name,
             'username'        => $request->username,
             'phone'           => $request->phone,
+            'hormuud_number'  => $request->hormuud_number,
+            'edahaba_number'  => $request->edahaba_number,
             'address'         => $request->address,
             'password'        => $request->password,
             'status'          => 'active',
@@ -116,6 +120,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'username_or_phone' => 'required|string',
+            'new_password'      => 'required|string|min:6',
         ]);
 
         $customer = CustomerApp::where('username', $request->username_or_phone)
@@ -129,11 +134,23 @@ class AuthController extends Controller
             ], 404);
         }
 
-        // In a real app, you would send an SMS/Email.
-        // For this system, we return a success message and allow a "Mock" reset.
+        // Update password with user provided password
+        $customer->password = Hash::make($request->new_password);
+        $customer->save();
+
+        $smsService = new \App\Services\SmsService();
+        $message = "Your password for the store app has been successfully reset.";
+
+        if ($customer->hormuud_number) {
+            $smsService->sendSms($customer->hormuud_number, $message);
+        }
+        if ($customer->edahaba_number) {
+            $smsService->sendSms($customer->edahaba_number, $message);
+        }
+
         return response()->json([
             'success' => true,
-            'message' => 'Password reset request received. Please contact the administrator at +252 61xxxxxxx to verify your identity and get a temporary password.',
+            'message' => "A new password has been sent to your registered Hormuudka/Edahaba numbers.",
         ]);
     }
 }

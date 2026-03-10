@@ -1,0 +1,71 @@
+﻿
+  Dropping all tables  378.33ms DONE
+
+   INFO  Preparing database.  
+
+  Creating migration table  20.76ms DONE
+
+   INFO  Running migrations.  
+
+  2026_02_14_083159_create_personal_access_tokens_table  93.73ms DONE
+  2026_02_14_085710_create_users_table  63.28ms DONE
+  2026_02_14_085711_create_customers_table  122.16ms DONE
+  2026_02_14_085712_create_suppliers_table  20.71ms DONE
+  2026_02_14_085713_create_products_table  244.64ms DONE
+  2026_02_14_085714_create_sales_table  215.44ms DONE
+  2026_02_14_085715_create_sale_items_table  189.39ms DONE
+  2026_02_14_090648_create_cache_table  88.36ms DONE
+  2026_02_14_090648_create_jobs_table  86.14ms DONE
+  2026_02_14_090648_create_sessions_table  77.78ms DONE
+  2026_02_14_102813_add_image_path_to_products_table  15.60ms DONE
+  2026_02_14_102814_add_plain_password_to_users_table  14.41ms DONE
+  2026_02_14_105043_create_accounting_and_expense_tables  1s DONE
+  2026_02_14_110521_add_notes_to_expenses_table  32.88ms DONE
+  2026_02_14_111452_create_purchases_and_purchase_items_tables  418.39ms DONE
+  2026_02_14_111454_add_admin_present_to_expenses_table  10.37ms DONE
+  2026_02_14_112206_ensure_audit_logs_table_exists  2.97ms DONE
+  2026_02_14_113205_add_walpo_fields_to_sales_and_items_table  29.22ms DONE
+  2026_02_14_114312_add_credit_to_payment_method_enum  74.84ms DONE
+  2026_02_14_114337_add_credit_to_payment_method_enum  0.15ms DONE
+  2026_02_15_124048_add_deleted_at_to_customers_table  11.76ms DONE
+  2026_02_15_130452_update_payment_methods_enum  252.08ms DONE
+  2026_02_16_072634_update_users_and_audit_log_for_activity_tracking  175.85ms DONE
+  2026_02_16_080512_add_purchase_and_transport_to_daily_summaries  31.81ms DONE
+  2026_02_16_093801_create_system_settings_table  122.83ms DONE
+  2026_02_16_122157_rename_tenant_admin_to_admin  1.21ms DONE
+  2026_02_17_000000_create_financial_reporting_tables  123.70ms DONE
+  2026_02_18_071555_add_permissions_to_users_table  25.42ms DONE
+  2026_02_18_072726_add_document_path_to_purchases_table  15.18ms DONE
+  2026_02_18_073614_add_product_name_to_purchase_items_table  78.42ms DONE
+  2026_02_18_080752_add_unit_to_purchase_items_table  19.89ms DONE
+  2026_02_19_000001_add_mobile_fields_to_customers_table  73.36ms DONE
+  2026_02_19_000002_create_customer_favorites_table  212.71ms DONE
+  2026_02_19_000003_create_product_ratings_table  261.85ms DONE
+  2026_02_19_000004_create_chat_messages_table  201.16ms DONE
+  2026_02_19_000005_make_cashier_id_nullable_on_sales_table  63.68ms DONE
+  2026_02_19_000006_add_pending_cancelled_to_sales_payment_status  53.63ms DONE
+  2026_02_19_000007_create_customer_app_table  44.72ms DONE
+  2026_02_19_000008_add_is_blocked_to_customer_app_table  11.29ms DONE
+  2026_02_19_000008_update_mobile_persistence_constraints  285.00ms DONE
+  2026_02_19_102631_add_app_manager_to_roles_enum  5.07ms DONE
+  2026_02_19_102633_add_blocking_and_status_to_customer_app_table  16.51ms DONE
+  2026_02_19_111433_force_add_app_manager_to_roles_enum  8.78ms DONE
+  2026_02_19_113214_add_customer_info_to_sales_table  30.71ms DONE
+  2026_02_19_150000_add_cancellation_fee_to_sales_table  7.59ms DONE
+  2026_02_19_160000_add_delivery_to_sales_table  16.32ms DONE
+  2026_02_21_000001_add_chat_fields_to_customer_app_table  26.85ms DONE
+  2026_02_21_092028_create_promotions_table  72.01ms DONE
+  2026_02_21_093510_add_discount_fields_to_products_table  32.48ms DONE
+  2026_02_21_093916_add_dates_to_promotions_table  14.33ms DONE
+  2026_02_22_095136_add_is_promotion_to_products_table  45.39ms DONE
+  2026_02_22_141500_update_inventory_deletion_constraints  541.52ms DONE
+
+
+   INFO  Seeding database.  
+
+  Database\Seeders\UserSeeder  RUNNING  
+  Database\Seeders\UserSeeder  194 ms DONE  
+
+  Database\Seeders\SystemSettingSeeder  RUNNING  
+  Database\Seeders\SystemSettingSeeder  87 ms DONE  
+

@@ -92,16 +92,7 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // Check if product has sales or purchases
-        $hasSales = \App\Models\SaleItem::where('product_id', $product->product_id)->exists();
-        $hasPurchases = \App\Models\PurchaseItem::where('product_id', $product->product_id)->exists();
-
-        if ($hasSales || $hasPurchases) {
-            return response()->json([
-                'message' => 'Badeecadan lama masaxi karo sababtoo ah waxay leedahay taariikh iib ama iibsi. Fadlan kaliya ka dhig mid aan shaqeynayn (Inactive).'
-            ], 403);
-        }
-
+        // Delete image if exists
         if ($product->image_path) {
             \Storage::disk('public')->delete($product->image_path);
         }

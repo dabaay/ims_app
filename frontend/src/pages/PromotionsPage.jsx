@@ -17,9 +17,12 @@ import {
     Download
 } from 'lucide-react';
 import { useLanguage } from '../context/useLanguage';
+import { AuthContext } from '../context/AuthContext';
+import { useContext } from 'react';
 
 const PromotionsPage = () => {
     const { t } = useLanguage();
+    const { canDo } = useContext(AuthContext);
     const [promotions, setPromotions] = useState([]);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -101,7 +104,13 @@ const PromotionsPage = () => {
             fetchData();
         } catch (err) {
             console.error(err);
-            alert('Failed to save promotion');
+            let errorMsg = 'Failed to save promotion';
+            if (err.response?.data?.errors) {
+                errorMsg = Object.values(err.response.data.errors).flat().join('\n');
+            } else if (err.response?.data?.message) {
+                errorMsg = err.response.data.message;
+            }
+            alert(errorMsg);
         } finally {
             setIsSubmitting(false);
         }
@@ -211,13 +220,15 @@ const PromotionsPage = () => {
                         <Download size={18} />
                         <span>{t('export_report')}</span>
                     </button>
-                    <button 
-                        onClick={() => setShowModal(true)}
-                        className="flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-600/20"
-                    >
-                        <Plus size={20} />
-                        <span>{t('post_new_promotion')}</span>
-                    </button>
+                    {canDo('mobile_management') && (
+                        <button 
+                            onClick={() => setShowModal(true)}
+                            className="flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-600/20"
+                        >
+                            <Plus size={20} />
+                            <span>{t('post_new_promotion')}</span>
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -264,29 +275,31 @@ const PromotionsPage = () => {
                                     <span className="px-3 py-1 bg-slate-800 text-slate-400 text-[10px] font-black uppercase tracking-widest border border-slate-700 rounded-lg">Inactive</span>
                                 </div>
                             )}
-                            <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button 
-                                    onClick={() => handleEdit(promo)}
-                                    className="p-2 bg-slate-900/80 hover:bg-blue-600 text-white rounded-xl backdrop-blur-md transition-all shadow-xl"
-                                    title="Edit"
-                                >
-                                    <Edit2 size={16} />
-                                </button>
-                                <button 
-                                    onClick={() => handleToggle(promo.promotion_id)}
-                                    className="p-2 bg-slate-900/80 hover:bg-emerald-600 text-white rounded-xl backdrop-blur-md transition-all shadow-xl"
-                                    title={promo.is_active ? 'Deactivate' : 'Activate'}
-                                >
-                                    {promo.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
-                                </button>
-                                <button 
-                                    onClick={() => handleDelete(promo.promotion_id)}
-                                    className="p-2 bg-slate-900/80 hover:bg-rose-600 text-white rounded-xl backdrop-blur-md transition-all shadow-xl"
-                                    title="Delete"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            </div>
+                            {canDo('mobile_management') && (
+                                <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button 
+                                        onClick={() => handleEdit(promo)}
+                                        className="p-2 bg-slate-900/80 hover:bg-blue-600 text-white rounded-xl backdrop-blur-md transition-all shadow-xl"
+                                        title="Edit"
+                                    >
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button 
+                                        onClick={() => handleToggle(promo.promotion_id)}
+                                        className="p-2 bg-slate-900/80 hover:bg-emerald-600 text-white rounded-xl backdrop-blur-md transition-all shadow-xl"
+                                        title={promo.is_active ? 'Deactivate' : 'Activate'}
+                                    >
+                                        {promo.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDelete(promo.promotion_id)}
+                                        className="p-2 bg-slate-900/80 hover:bg-rose-600 text-white rounded-xl backdrop-blur-md transition-all shadow-xl"
+                                        title="Delete"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                         <div className="p-6 flex-1 flex flex-col">
                             <div className="flex items-start justify-between mb-2">
@@ -436,7 +449,7 @@ const PromotionsPage = () => {
 
                             <button 
                                 type="submit" 
-                                disabled={isSubmitting || !formData.image}
+                                disabled={isSubmitting || (!editingId && !formData.image)}
                                 className="w-full h-14 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-blue-600/20 flex items-center justify-center space-x-2"
                             >
                                 {isSubmitting ? (

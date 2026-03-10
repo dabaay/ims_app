@@ -38,6 +38,14 @@ class DashboardController extends Controller
         
         $inventoryValue = Product::sum(DB::raw('current_stock * cost_price'));
         $totalDebt = Debt::where('status', '!=', 'paid')->where('status', '!=', 'written_off')->sum('remaining_amount');
+        $totalDeliveryRevenue = Sale::sum('delivery_price');
+
+        // Total Expenses Calculation
+        $manualExpenses = Expense::where('status', 'approved')->sum('amount');
+        $transactionExpenses = DB::table('financial_transactions')
+            ->whereIn('transaction_type', ['purchase', 'transportation'])
+            ->sum('debit');
+        $totalExpenses = $manualExpenses + $transactionExpenses;
 
         // Module Counters
         $moduleCounts = [
@@ -50,6 +58,18 @@ class DashboardController extends Controller
             'expenses' => Expense::count(),
             'debts' => Debt::count(),
         ];
+
+        // Profit by Product Breakdown
+        $profitByProduct = DB::table('sale_items')
+            ->select(
+                'product_name as name',
+                DB::raw('COALESCE(SUM(subtotal), 0) as revenue'),
+                DB::raw('COALESCE(SUM(quantity * cost_price), 0) as cost'),
+                DB::raw('COALESCE(SUM(subtotal - (quantity * cost_price)), 0) as profit')
+            )
+            ->groupBy('product_name')
+            ->orderBy('profit', 'desc')
+            ->get();
         
         $recentSales = Sale::with('customer')->latest()->take(5)->get();
         
@@ -205,8 +225,11 @@ class DashboardController extends Controller
                 'estimated_profit' => $estimatedProfit,
                 'inventory_value' => $inventoryValue,
                 'total_outstanding_debt' => $totalDebt,
+                'total_delivery_revenue' => $totalDeliveryRevenue,
+                'total_expenses' => $totalExpenses,
             ],
             'module_counts' => $moduleCounts,
+            'profit_by_product' => $profitByProduct,
             'recent_activity' => $recentSales,
             'top_products' => $topProducts,
             'salesTrend' => $salesTrend,

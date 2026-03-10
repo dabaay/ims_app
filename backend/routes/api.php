@@ -42,7 +42,7 @@ Route::middleware(['auth:sanctum', 'permission:mobile_management'])->prefix('mob
     // Promotions Management
     Route::get('/promotions', [PromotionController::class, 'index']);
     Route::post('/promotions', [PromotionController::class, 'store']);
-    Route::post('/promotions/{id}', [PromotionController::class, 'update']); // Using POST for multipart with method spoofing if needed
+    Route::match(['put', 'patch', 'post'], '/promotions/{id}', [PromotionController::class, 'update']);
     Route::delete('/promotions/{id}', [PromotionController::class, 'destroy']);
     Route::post('/promotions/{id}/toggle', [PromotionController::class, 'toggleActive']);
 });
@@ -182,7 +182,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // ============================================================
-// MOBILE API ROUTES (for Flutter Dukaan App customers)
+// MOBILE API ROUTES (for Flutter Store App customers)
 // ============================================================
 use App\Http\Controllers\Api\Mobile\AuthController as MobileAuthController;
 use App\Http\Controllers\Api\Mobile\DashboardController as MobileDashboardController;

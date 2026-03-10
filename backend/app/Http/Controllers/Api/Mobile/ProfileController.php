@@ -32,13 +32,15 @@ class ProfileController extends Controller
         $customer = $request->user('customer');
 
         $request->validate([
-            'full_name' => 'sometimes|string|max:100',
-            'phone'     => 'sometimes|string|unique:customerApp,phone,' . $customer->customer_id . ',customer_id',
-            'address'   => 'nullable|string',
-            'profile_image' => 'nullable|image|max:2048',
+            'full_name'      => 'sometimes|string|max:100',
+            'phone'          => 'sometimes|string|unique:customerApp,phone,' . $customer->customer_id . ',customer_id',
+            'hormuud_number' => 'nullable|string',
+            'edahaba_number' => 'nullable|string',
+            'address'        => 'nullable|string',
+            'profile_image'  => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->only(['full_name', 'phone', 'address']);
+        $data = $request->only(['full_name', 'phone', 'address', 'hormuud_number', 'edahaba_number']);
 
         if ($request->hasFile('profile_image')) {
             // Delete old image
